@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en" data-theme="dim" data-lavish-annotate="off">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ghostty customize — applied</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daisyui@5.5.19/daisyui.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daisyui@5.5.19/themes.css">
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.2.4/dist/index.global.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    :where(.grid, .flex) > * { min-width: 0; }
+    .term {
+      font-family: "JetBrainsMono Nerd Font", "JetBrainsMono NF", ui-monospace, monospace;
+      font-size: 13px; line-height: 1.45; border-radius: 0.75rem; overflow: hidden;
+      border: 1px solid color-mix(in oklab, currentColor 12%, transparent);
+      background: #191724; color: #e0def4;
+    }
+    .term-bar { display:flex; gap:6px; align-items:center; padding:8px 12px; font-size:11px; background:#1f1d2e; color:#908caa; }
+    .term-dot { width:8px; height:8px; border-radius:999px; background:currentColor; opacity:0.35; }
+    .term-body { padding:12px 14px; white-space:pre-wrap; }
+  </style>
+</head>
+<body class="bg-base-300 text-base-content min-h-screen">
+  <main class="mx-auto max-w-3xl p-4 sm:p-8 space-y-6">
+    <header class="space-y-2">
+      <span class="badge badge-soft badge-success">Applied</span>
+      <h1 class="text-3xl font-bold">Ghostty look + chezmoi — done</h1>
+      <p class="text-base-content/80">Reload config in Ghostty with <code>ctrl+shift+,</code> if an instance is already open.</p>
+    </header>
+
+    <div class="term">
+      <div class="term-bar"><span class="term-dot"></span><span class="term-dot"></span><span class="term-dot"></span><span class="ml-2">~/.config/ghostty/config</span></div>
+      <div class="term-body"><span style="color:#31748f">theme</span> = Rose Pine
+<span style="color:#9ccfd8">font-family</span> = JetBrainsMono Nerd Font
+<span style="color:#9ccfd8">font-size</span> = 13
+<span style="color:#6e6a86"># sacred: shift+enter, ctrl+backspace</span>
+<span style="color:#6e6a86"># chezmoi: dot_config/ghostty/config</span></div>
+    </div>
+
+    <div class="rounded-box bg-base-100 p-5 space-y-2 text-sm">
+      <p><strong>Live truth:</strong> <code>~/.config/ghostty</code></p>
+      <p><strong>Chezmoi source:</strong> <code>~/.local/share/chezmoi/dot_config/ghostty/config</code> (auto-committed on add)</p>
+      <p><strong>After future live edits:</strong></p>
+      <pre class="bg-base-200 rounded-box p-3 overflow-x-auto">chezmoi re-add ~/.config/ghostty</pre>
+    </div>
+  </main>
+</body>
+</html>

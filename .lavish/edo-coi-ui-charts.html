@@ -1,0 +1,389 @@
+<!doctype html>
+<html lang="en" data-theme="luxury" data-lavish-annotate="off">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>EDO vs COI — chart &amp; UI choices</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daisyui@5.5.19/daisyui.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daisyui@5.5.19/themes.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.2.4/dist/index.global.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    :where(.grid, .flex) > * { min-width: 0; }
+    :where(p, h1, h2, h3, h4, li, td, th, .badge, .label) { overflow-wrap: anywhere; }
+    :where(img, svg, video, canvas, iframe) { max-width: 100%; height: auto; }
+    .chart-frame {
+      background: color-mix(in oklab, var(--color-base-200) 70%, transparent);
+      border: 1px solid color-mix(in oklab, var(--color-base-content) 12%, transparent);
+      border-radius: 0.75rem;
+      padding: 0.75rem;
+    }
+    .chart-frame svg { width: 100%; height: auto; display: block; }
+    .opt-card:has(input:checked) {
+      outline: 2px solid var(--color-primary);
+      outline-offset: 2px;
+    }
+  </style>
+</head>
+<body class="bg-base-300 text-base-content min-h-screen">
+  <main class="mx-auto max-w-6xl p-4 sm:p-6 lg:p-10 space-y-8">
+    <header class="space-y-3">
+      <p class="badge badge-soft badge-primary">Round 3 · UI / chart</p>
+      <h1 class="text-3xl sm:text-4xl font-bold tracking-tight">Pick how the EDO vs COI sim looks</h1>
+      <p class="max-w-3xl text-base-content/80">
+        Settled model: lump sum, both products side-by-side, inflation slider, Belka net (gross checkbox),
+        COI coupon reinvest, horizon 1–20 with rolls, idle cash &lt; 100 PLN.
+        Chart must show <strong>wallet value</strong> and <strong>income after early-redemption fees</strong>.
+        Choose a chart family, then layout. Queue answers, then <strong>Send to Agent</strong> in Lavish.
+      </p>
+      <div class="alert alert-info text-sm">
+        <span>Recommendation baked into defaults below: dual-panel (line wallet + grouped bars for income), sidebar controls, COI/EDO color lock.</span>
+      </div>
+    </header>
+
+    <section class="card card-border bg-base-100">
+      <div class="card-body gap-4">
+        <h2 class="card-title text-xl">Q12 — Chart family</h2>
+        <p class="text-sm text-base-content/70 -mt-2">One primary visual language for Streamlit + matplotlib.</p>
+
+        <form data-lavish-question="chart-family" class="space-y-4"
+          onsubmit="event.preventDefault(); const v = new FormData(event.currentTarget).get('chart'); if (!v) return; window.lavish.queuePrompt('Use chart family: ' + v, { tag: 'choice', text: 'Chart family: ' + v, element: event.currentTarget, data: { question: 'chart-family', answer: v }, queueKey: 'chart-family' }); event.currentTarget.querySelector('[data-q-status]').textContent = 'Queued: ' + v;">
+
+          <div class="grid gap-4 lg:grid-cols-2">
+            <!-- A Dual line -->
+            <label class="opt-card card card-border bg-base-200 cursor-pointer">
+              <div class="card-body gap-3">
+                <div class="flex items-start gap-3">
+                  <input type="radio" name="chart" value="dual-line" class="radio radio-primary mt-1" />
+                  <div>
+                    <div class="font-semibold">A · Dual line</div>
+                    <p class="text-sm text-base-content/70">Two lines (COI vs EDO) for wallet. Second figure or twin axis for income.</p>
+                  </div>
+                </div>
+                <div class="chart-frame">
+                  <svg viewBox="0 0 320 140" role="img" aria-label="Dual line mock">
+                    <text x="8" y="14" font-size="10" fill="currentColor" opacity="0.55">Wallet PLN</text>
+                    <polyline fill="none" stroke="#3b82f6" stroke-width="2.5" points="20,110 60,100 100,88 140,78 180,70 220,55 260,48 300,40" />
+                    <polyline fill="none" stroke="#f59e0b" stroke-width="2.5" points="20,110 60,102 100,92 140,82 180,68 220,50 260,42 300,30" />
+                    <circle cx="300" cy="40" r="3" fill="#3b82f6" />
+                    <circle cx="300" cy="30" r="3" fill="#f59e0b" />
+                    <text x="230" y="128" font-size="9" fill="#3b82f6">COI</text>
+                    <text x="265" y="128" font-size="9" fill="#f59e0b">EDO</text>
+                  </svg>
+                </div>
+                <ul class="text-xs space-y-1 text-base-content/70 list-disc pl-4">
+                  <li>Best for growth path over years</li>
+                  <li>Fee impact subtle unless income is a 2nd plot</li>
+                </ul>
+              </div>
+            </label>
+
+            <!-- B Grouped bars -->
+            <label class="opt-card card card-border bg-base-200 cursor-pointer">
+              <div class="card-body gap-3">
+                <div class="flex items-start gap-3">
+                  <input type="radio" name="chart" value="grouped-bars" class="radio radio-primary mt-1" />
+                  <div>
+                    <div class="font-semibold">B · Grouped bars</div>
+                    <p class="text-sm text-base-content/70">Per year: COI vs EDO bars. Toggle metric: wallet or income.</p>
+                  </div>
+                </div>
+                <div class="chart-frame">
+                  <svg viewBox="0 0 320 140" role="img" aria-label="Grouped bars mock">
+                    <text x="8" y="14" font-size="10" fill="currentColor" opacity="0.55">Per-year value</text>
+                    <g fill="#3b82f6">
+                      <rect x="28" y="80" width="14" height="40" /><rect x="68" y="70" width="14" height="50" />
+                      <rect x="108" y="60" width="14" height="60" /><rect x="148" y="52" width="14" height="68" />
+                      <rect x="188" y="44" width="14" height="76" /><rect x="228" y="36" width="14" height="84" />
+                      <rect x="268" y="28" width="14" height="92" />
+                    </g>
+                    <g fill="#f59e0b">
+                      <rect x="44" y="78" width="14" height="42" /><rect x="84" y="66" width="14" height="54" />
+                      <rect x="124" y="54" width="14" height="66" /><rect x="164" y="46" width="14" height="74" />
+                      <rect x="204" y="38" width="14" height="82" /><rect x="244" y="30" width="14" height="90" />
+                      <rect x="284" y="22" width="14" height="98" />
+                    </g>
+                  </svg>
+                </div>
+                <ul class="text-xs space-y-1 text-base-content/70 list-disc pl-4">
+                  <li>Easy year-to-year compare</li>
+                  <li>Two metrics need tab/toggle or two charts</li>
+                </ul>
+              </div>
+            </label>
+
+            <!-- C Dual panel recommended -->
+            <label class="opt-card card card-border bg-base-200 cursor-pointer">
+              <div class="card-body gap-3">
+                <div class="flex items-start gap-3">
+                  <input type="radio" name="chart" value="dual-panel" class="radio radio-primary mt-1" checked />
+                  <div>
+                    <div class="font-semibold flex items-center gap-2">C · Dual panel <span class="badge badge-primary badge-sm">recommended</span></div>
+                    <p class="text-sm text-base-content/70">Top: wallet lines. Bottom: income bars (fee-reduced early exit).</p>
+                  </div>
+                </div>
+                <div class="chart-frame space-y-2">
+                  <svg viewBox="0 0 320 70" role="img" aria-label="Wallet lines">
+                    <text x="8" y="12" font-size="9" fill="currentColor" opacity="0.55">Wallet</text>
+                    <polyline fill="none" stroke="#3b82f6" stroke-width="2" points="16,55 70,48 130,40 190,32 250,26 304,20" />
+                    <polyline fill="none" stroke="#f59e0b" stroke-width="2" points="16,55 70,50 130,42 190,30 250,22 304,14" />
+                  </svg>
+                  <svg viewBox="0 0 320 70" role="img" aria-label="Income bars">
+                    <text x="8" y="12" font-size="9" fill="currentColor" opacity="0.55">Income − fees</text>
+                    <g fill="#3b82f6" opacity="0.85">
+                      <rect x="30" y="40" width="12" height="22" /><rect x="70" y="34" width="12" height="28" />
+                      <rect x="110" y="28" width="12" height="34" /><rect x="150" y="24" width="12" height="38" />
+                      <rect x="190" y="20" width="12" height="42" /><rect x="230" y="16" width="12" height="46" />
+                      <rect x="270" y="12" width="12" height="50" />
+                    </g>
+                    <g fill="#f59e0b" opacity="0.85">
+                      <rect x="44" y="38" width="12" height="24" /><rect x="84" y="30" width="12" height="32" />
+                      <rect x="124" y="24" width="12" height="38" /><rect x="164" y="18" width="12" height="44" />
+                      <rect x="204" y="14" width="12" height="48" /><rect x="244" y="10" width="12" height="52" />
+                      <rect x="284" y="8" width="12" height="54" />
+                    </g>
+                  </svg>
+                </div>
+                <ul class="text-xs space-y-1 text-base-content/70 list-disc pl-4">
+                  <li>Matches Q7: both metrics always visible</li>
+                  <li>Slightly taller page; matplotlib subplot friendly</li>
+                </ul>
+              </div>
+            </label>
+
+            <!-- D Combo twin axis -->
+            <label class="opt-card card card-border bg-base-200 cursor-pointer">
+              <div class="card-body gap-3">
+                <div class="flex items-start gap-3">
+                  <input type="radio" name="chart" value="combo-twin-axis" class="radio radio-primary mt-1" />
+                  <div>
+                    <div class="font-semibold">D · Combo twin-axis</div>
+                    <p class="text-sm text-base-content/70">One axes: wallet lines. Twin Y: income as thin bars / dashed lines.</p>
+                  </div>
+                </div>
+                <div class="chart-frame">
+                  <svg viewBox="0 0 320 140" role="img" aria-label="Combo twin axis mock">
+                    <text x="8" y="14" font-size="10" fill="currentColor" opacity="0.55">Wallet (L) · Income (R)</text>
+                    <g fill="#3b82f6" opacity="0.35">
+                      <rect x="36" y="90" width="10" height="30" /><rect x="76" y="82" width="10" height="38" />
+                      <rect x="116" y="74" width="10" height="46" /><rect x="156" y="68" width="10" height="52" />
+                      <rect x="196" y="60" width="10" height="60" /><rect x="236" y="52" width="10" height="68" />
+                      <rect x="276" y="44" width="10" height="76" />
+                    </g>
+                    <polyline fill="none" stroke="#3b82f6" stroke-width="2.5" points="40,100 80,92 120,84 160,76 200,66 240,56 280,48" />
+                    <polyline fill="none" stroke="#f59e0b" stroke-width="2.5" points="40,100 80,94 120,86 160,74 200,62 240,50 280,40" />
+                  </svg>
+                </div>
+                <ul class="text-xs space-y-1 text-base-content/70 list-disc pl-4">
+                  <li>Compact single figure</li>
+                  <li>Twin scales easy to misread</li>
+                </ul>
+              </div>
+            </label>
+
+            <!-- E Area -->
+            <label class="opt-card card card-border bg-base-200 cursor-pointer lg:col-span-2">
+              <div class="card-body gap-3">
+                <div class="flex items-start gap-3">
+                  <input type="radio" name="chart" value="area-diff" class="radio radio-primary mt-1" />
+                  <div>
+                    <div class="font-semibold">E · Area difference</div>
+                    <p class="text-sm text-base-content/70">Filled areas for wallet; hatched band = EDO−COI gap. Income still needs a second panel or toggle.</p>
+                  </div>
+                </div>
+                <div class="chart-frame max-w-xl">
+                  <svg viewBox="0 0 320 100" role="img" aria-label="Area difference mock">
+                    <defs>
+                      <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.45" />
+                        <stop offset="100%" stop-color="#f59e0b" stop-opacity="0.05" />
+                      </linearGradient>
+                      <linearGradient id="g2" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.45" />
+                        <stop offset="100%" stop-color="#3b82f6" stop-opacity="0.05" />
+                      </linearGradient>
+                    </defs>
+                    <polygon fill="url(#g1)" points="20,80 80,70 140,58 200,46 260,36 300,28 300,90 20,90" />
+                    <polygon fill="url(#g2)" points="20,80 80,72 140,62 200,52 260,44 300,38 300,90 20,90" />
+                    <polyline fill="none" stroke="#f59e0b" stroke-width="2" points="20,80 80,70 140,58 200,46 260,36 300,28" />
+                    <polyline fill="none" stroke="#3b82f6" stroke-width="2" points="20,80 80,72 140,62 200,52 260,44 300,38" />
+                  </svg>
+                </div>
+              </div>
+            </label>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-3">
+            <button type="submit" class="btn btn-primary">Queue chart family</button>
+            <span data-q-status class="text-sm text-base-content/60" role="status"></span>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <section class="card card-border bg-base-100">
+      <div class="card-body gap-4">
+        <h2 class="card-title text-xl">Q13 — Page layout</h2>
+        <form data-lavish-question="page-layout" class="space-y-4"
+          onsubmit="event.preventDefault(); const v = new FormData(event.currentTarget).get('layout'); if (!v) return; window.lavish.queuePrompt('Use page layout: ' + v, { tag: 'choice', text: 'Layout: ' + v, element: event.currentTarget, data: { question: 'page-layout', answer: v }, queueKey: 'page-layout' }); event.currentTarget.querySelector('[data-q-status]').textContent = 'Queued: ' + v;">
+
+          <div class="grid gap-3 sm:grid-cols-3">
+            <label class="opt-card card card-border bg-base-200 cursor-pointer">
+              <div class="card-body gap-2">
+                <div class="flex gap-2 items-start">
+                  <input type="radio" name="layout" value="sidebar-controls" class="radio radio-primary mt-1" checked />
+                  <div>
+                    <div class="font-semibold text-sm">Sidebar controls <span class="badge badge-primary badge-xs">rec</span></div>
+                    <p class="text-xs text-base-content/70 mt-1">Sliders left; chart fills right. Classic Streamlit.</p>
+                  </div>
+                </div>
+                <div class="chart-frame p-2">
+                  <svg viewBox="0 0 200 80" aria-hidden="true">
+                    <rect x="4" y="4" width="50" height="72" rx="4" fill="currentColor" opacity="0.12" />
+                    <rect x="12" y="16" width="34" height="4" rx="2" fill="currentColor" opacity="0.35" />
+                    <rect x="12" y="28" width="34" height="4" rx="2" fill="currentColor" opacity="0.35" />
+                    <rect x="12" y="40" width="34" height="4" rx="2" fill="currentColor" opacity="0.35" />
+                    <rect x="62" y="10" width="130" height="60" rx="4" fill="currentColor" opacity="0.08" stroke="currentColor" stroke-opacity="0.2" />
+                  </svg>
+                </div>
+              </div>
+            </label>
+
+            <label class="opt-card card card-border bg-base-200 cursor-pointer">
+              <div class="card-body gap-2">
+                <div class="flex gap-2 items-start">
+                  <input type="radio" name="layout" value="top-controls" class="radio radio-primary mt-1" />
+                  <div>
+                    <div class="font-semibold text-sm">Top controls strip</div>
+                    <p class="text-xs text-base-content/70 mt-1">Sliders above full-width chart. Better on narrow screens.</p>
+                  </div>
+                </div>
+                <div class="chart-frame p-2">
+                  <svg viewBox="0 0 200 80" aria-hidden="true">
+                    <rect x="4" y="4" width="192" height="22" rx="4" fill="currentColor" opacity="0.12" />
+                    <rect x="4" y="32" width="192" height="44" rx="4" fill="currentColor" opacity="0.08" stroke="currentColor" stroke-opacity="0.2" />
+                  </svg>
+                </div>
+              </div>
+            </label>
+
+            <label class="opt-card card card-border bg-base-200 cursor-pointer">
+              <div class="card-body gap-2">
+                <div class="flex gap-2 items-start">
+                  <input type="radio" name="layout" value="tabs-metrics" class="radio radio-primary mt-1" />
+                  <div>
+                    <div class="font-semibold text-sm">Tabs: Wallet | Income</div>
+                    <p class="text-xs text-base-content/70 mt-1">One chart at a time. Only if you rejected dual-panel.</p>
+                  </div>
+                </div>
+                <div class="chart-frame p-2">
+                  <svg viewBox="0 0 200 80" aria-hidden="true">
+                    <rect x="4" y="4" width="50" height="14" rx="3" fill="currentColor" opacity="0.25" />
+                    <rect x="58" y="4" width="50" height="14" rx="3" fill="currentColor" opacity="0.1" />
+                    <rect x="4" y="24" width="192" height="52" rx="4" fill="currentColor" opacity="0.08" stroke="currentColor" stroke-opacity="0.2" />
+                  </svg>
+                </div>
+              </div>
+            </label>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-3">
+            <button type="submit" class="btn btn-primary">Queue layout</button>
+            <span data-q-status class="text-sm text-base-content/60" role="status"></span>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <section class="card card-border bg-base-100">
+      <div class="card-body gap-4">
+        <h2 class="card-title text-xl">Q14 — Extras (multi-select OK)</h2>
+        <form data-lavish-question="extras" class="space-y-4"
+          onsubmit="event.preventDefault(); const selected = [...event.currentTarget.querySelectorAll('input[name=extra]:checked')].map((i) => i.value); const text = selected.length ? selected.join(', ') : 'none'; window.lavish.queuePrompt('UI extras: ' + text, { tag: 'choice', text: 'Extras: ' + text, element: event.currentTarget, data: { question: 'extras', answer: selected }, queueKey: 'extras' }); event.currentTarget.querySelector('[data-q-status]').textContent = 'Queued: ' + text;">
+
+          <div class="grid gap-2 sm:grid-cols-2">
+            <label class="label cursor-pointer justify-start gap-3">
+              <input type="checkbox" name="extra" value="kpi-row" class="checkbox checkbox-primary" checked />
+              <span class="label-text">KPI row at top (final wallet, profit, Δ EDO−COI)</span>
+            </label>
+            <label class="label cursor-pointer justify-start gap-3">
+              <input type="checkbox" name="extra" value="year-table" class="checkbox checkbox-primary" checked />
+              <span class="label-text">Expandable year-by-year table under chart</span>
+            </label>
+            <label class="label cursor-pointer justify-start gap-3">
+              <input type="checkbox" name="extra" value="mark-rolls" class="checkbox checkbox-primary" checked />
+              <span class="label-text">Mark COI 4y / EDO 10y roll years on chart</span>
+            </label>
+            <label class="label cursor-pointer justify-start gap-3">
+              <input type="checkbox" name="extra" value="idle-cash-line" class="checkbox checkbox-primary" />
+              <span class="label-text">Show idle cash (&lt;100 PLN) as separate series</span>
+            </label>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-3">
+            <button type="submit" class="btn btn-primary">Queue extras</button>
+            <span data-q-status class="text-sm text-base-content/60" role="status"></span>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <section class="card card-border bg-base-100">
+      <div class="card-body gap-3">
+        <h2 class="card-title text-lg">Without Lavish?</h2>
+        <p class="text-sm text-base-content/70">Copy answers and paste into chat.</p>
+        <div>
+          <button type="button" class="btn btn-outline btn-sm" onclick="(async (btn) => {
+            const copyRun = btn._lavishCopyRun = (btn._lavishCopyRun || 0) + 1;
+            const qs = [...document.querySelectorAll('[data-lavish-question]')];
+            const status = btn.parentElement.querySelector('[data-lavish-copy-all-status]');
+            btn.parentElement.querySelector('[data-lavish-copy-all-manual]')?.remove();
+            const out = [];
+            for (const q of qs) {
+              const key = q.getAttribute('data-lavish-question')?.trim() || 'Question';
+              const lines = [];
+              for (const el of q.querySelectorAll('input, select, textarea')) {
+                if (el.matches(':disabled')) continue;
+                if (el.closest('[data-lavish-question]') !== q) continue;
+                const isChoice = el.matches('input[type=checkbox], input[type=radio]');
+                if (isChoice && !el.checked) continue;
+                if (el.matches('input[type=button], input[type=submit], input[type=reset], input[type=image], input[type=hidden], input[type=file], input[type=range], input[type=color]')) continue;
+                let vals;
+                if (el instanceof HTMLSelectElement) {
+                  vals = [...el.selectedOptions].filter((o) => !o.disabled).map((o) => o.value.trim()).filter(Boolean);
+                } else {
+                  const v = isChoice && (!el.hasAttribute('value') || !el.value.trim())
+                    ? el.labels?.[0]?.textContent?.trim() || el.name || ''
+                    : el.value.trim();
+                  vals = v ? [v] : [];
+                }
+                const label = el.name || el.labels?.[0]?.textContent?.trim() || el.tagName.toLowerCase();
+                for (const v of vals) lines.push('  ' + label + ': ' + v);
+              }
+              if (lines.length) out.push(key + ':\\n' + lines.join('\\n'));
+            }
+            const text = out.join('\\n\\n');
+            if (!text) { status.textContent = 'No answers yet.'; return; }
+            status.textContent = '';
+            try {
+              await navigator.clipboard.writeText(text);
+              if (copyRun !== btn._lavishCopyRun) return;
+              status.textContent = 'Answers copied.';
+              return;
+            } catch {}
+            const man = document.createElement('textarea');
+            man.value = text;
+            man.readOnly = true;
+            man.rows = Math.min(12, Math.max(3, text.split('\\n').length));
+            man.dataset.lavishCopyAllManual = '';
+            btn.insertAdjacentElement('afterend', man);
+            man.focus(); man.select();
+            status.textContent = 'Clipboard blocked — copy manually.';
+          })(this)">Copy all answers</button>
+          <span data-lavish-copy-all-status class="text-sm ml-2" role="status" aria-live="polite"></span>
+        </div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

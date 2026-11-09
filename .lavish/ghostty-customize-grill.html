@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="en" data-theme="nightlife" data-lavish-annotate="off">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ghostty customize — grill round 1</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daisyui@5.5.19/daisyui.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daisyui@5.5.19/themes.css">
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.2.4/dist/index.global.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    :where(.grid, .flex) > * { min-width: 0; }
+    :where(p, h1, h2, h3, li, td, th, .badge, .label) { overflow-wrap: anywhere; }
+    .mock-term {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      background: #0d1117;
+      color: #c9d1d9;
+      border: 1px solid color-mix(in oklab, currentColor 18%, transparent);
+    }
+    .mock-term .prompt { color: #7ee787; }
+    .mock-term .dim { color: #8b949e; }
+  </style>
+</head>
+<body class="bg-base-300 text-base-content min-h-screen">
+  <main class="mx-auto max-w-5xl p-4 sm:p-8 space-y-8">
+    <header class="space-y-3">
+      <p class="badge badge-soft badge-primary">Grill round 1 · Ghostty</p>
+      <h1 class="text-3xl sm:text-4xl font-bold tracking-tight">Customize Ghostty — settle the tree first</h1>
+      <p class="text-base-content/80 max-w-3xl">
+        Config already exists at <code class="text-sm">~/.config/ghostty/config</code> (Ghostty 1.3 tip, GTK).
+        Agent-friendly keybinds are in place. This round locks the decisions that unlock themes, fonts, and deeper keybind work.
+      </p>
+    </header>
+
+    <section class="grid gap-4 lg:grid-cols-2">
+      <div class="rounded-box bg-base-100 p-5 space-y-3">
+        <h2 class="text-xl font-semibold">Current state (fact)</h2>
+        <div class="mock-term rounded-box p-4 text-sm leading-relaxed space-y-1">
+          <div><span class="dim">#</span> ~/.config/ghostty/config</div>
+          <div>keybind = shift+enter=text:\x1b[13;2u</div>
+          <div>keybind = ctrl+backspace=text:\x1b[127;3u</div>
+          <div>clipboard-paste-protection = false</div>
+          <div>window-padding-x/y = 4</div>
+          <div>confirm-close-surface = false</div>
+          <div>shell-integration-features = cursor,sudo,title</div>
+          <div class="dim mt-2"># no theme · no font-family · shell default fish</div>
+        </div>
+        <p class="text-sm text-base-content/70">
+          Comment in file: Cursor CLI + Herdr friendly. Open/reload: <code>ctrl+,</code> / <code>ctrl+shift+,</code>.
+        </p>
+      </div>
+
+      <div class="rounded-box bg-base-100 p-5 space-y-3">
+        <h2 class="text-xl font-semibold">Design tree</h2>
+        <svg viewBox="0 0 520 280" role="img" aria-label="Ghostty customization decision tree" class="w-full h-auto">
+          <rect x="150" y="8" width="220" height="44" rx="8" fill="oklch(55% 0.15 250)" />
+          <text x="260" y="35" text-anchor="middle" fill="white" font-size="14" font-family="system-ui">Goal for this customize pass</text>
+
+          <line x1="260" y1="52" x2="90" y2="100" stroke="currentColor" stroke-opacity="0.35" />
+          <line x1="260" y1="52" x2="260" y2="100" stroke="currentColor" stroke-opacity="0.35" />
+          <line x1="260" y1="52" x2="430" y2="100" stroke="currentColor" stroke-opacity="0.35" />
+
+          <rect x="10" y="100" width="160" height="40" rx="8" fill="oklch(70% 0.08 250 / 0.35)" stroke="currentColor" stroke-opacity="0.25" />
+          <text x="90" y="125" text-anchor="middle" fill="currentColor" font-size="12" font-family="system-ui">Keep agent keybinds?</text>
+
+          <rect x="180" y="100" width="160" height="40" rx="8" fill="oklch(70% 0.08 250 / 0.35)" stroke="currentColor" stroke-opacity="0.25" />
+          <text x="260" y="125" text-anchor="middle" fill="currentColor" font-size="12" font-family="system-ui">Look direction</text>
+
+          <rect x="350" y="100" width="160" height="40" rx="8" fill="oklch(70% 0.08 250 / 0.35)" stroke="currentColor" stroke-opacity="0.25" />
+          <text x="430" y="125" text-anchor="middle" fill="currentColor" font-size="12" font-family="system-ui">How deep?</text>
+
+          <line x1="90" y1="140" x2="90" y2="180" stroke="currentColor" stroke-opacity="0.25" stroke-dasharray="4 3" />
+          <line x1="260" y1="140" x2="260" y2="180" stroke="currentColor" stroke-opacity="0.25" stroke-dasharray="4 3" />
+          <line x1="430" y1="140" x2="430" y2="180" stroke="currentColor" stroke-opacity="0.25" stroke-dasharray="4 3" />
+
+          <rect x="10" y="180" width="160" height="56" rx="8" fill="oklch(62% 0.12 145 / 0.25)" stroke="currentColor" stroke-opacity="0.2" />
+          <text x="90" y="205" text-anchor="middle" fill="currentColor" font-size="11" font-family="system-ui">later: extra binds,</text>
+          <text x="90" y="222" text-anchor="middle" fill="currentColor" font-size="11" font-family="system-ui">split/tab muscle memory</text>
+
+          <rect x="180" y="180" width="160" height="56" rx="8" fill="oklch(62% 0.12 145 / 0.25)" stroke="currentColor" stroke-opacity="0.2" />
+          <text x="260" y="205" text-anchor="middle" fill="currentColor" font-size="11" font-family="system-ui">later: theme name,</text>
+          <text x="260" y="222" text-anchor="middle" fill="currentColor" font-size="11" font-family="system-ui">font, opacity, padding</text>
+
+          <rect x="350" y="180" width="160" height="56" rx="8" fill="oklch(62% 0.12 145 / 0.25)" stroke="currentColor" stroke-opacity="0.2" />
+          <text x="430" y="205" text-anchor="middle" fill="currentColor" font-size="11" font-family="system-ui">later: custom theme,</text>
+          <text x="430" y="222" text-anchor="middle" fill="currentColor" font-size="11" font-family="system-ui">dotfiles split, GPU</text>
+
+          <text x="260" y="265" text-anchor="middle" fill="currentColor" fill-opacity="0.55" font-size="11" font-family="system-ui">Dashed = blocked until this round answers land</text>
+        </svg>
+      </div>
+    </section>
+
+    <section class="space-y-4">
+      <div class="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h2 class="text-2xl font-semibold">Round 1 frontier</h2>
+          <p class="text-base-content/70 text-sm">Answer each question. “Yes” means accept the recommended answer. Queue each when ready, then Send to Agent.</p>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <button type="button" class="btn btn-sm btn-outline" onclick="(async (btn) => {
+            const copyRun = btn._lavishCopyRun = (btn._lavishCopyRun || 0) + 1;
+            const qs = [...document.querySelectorAll('[data-lavish-question]')];
+            const status = btn.parentElement.querySelector('[data-lavish-copy-all-status]');
+            btn.parentElement.querySelector('[data-lavish-copy-all-manual]')?.remove();
+            const out = [];
+            for (const q of qs) {
+              const key = q.getAttribute('data-lavish-question')?.trim() || 'Question';
+              const lines = [];
+              for (const el of q.querySelectorAll('input, select, textarea')) {
+                if (el.matches(':disabled')) continue;
+                if (el.closest('[data-lavish-question]') !== q) continue;
+                const isChoice = el.matches('input[type=checkbox], input[type=radio]');
+                if (isChoice && !el.checked) continue;
+                if (el.matches('input[type=button], input[type=submit], input[type=reset], input[type=image], input[type=hidden], input[type=file], input[type=range], input[type=color]')) continue;
+                let vals;
+                if (el instanceof HTMLSelectElement) {
+                  vals = [...el.selectedOptions].filter((o) => !o.disabled && !o.closest('optgroup[disabled]')).map((o) => o.value.trim()).filter(Boolean);
+                } else {
+                  const v = isChoice && (!el.hasAttribute('value') || !el.value.trim())
+                    ? el.labels?.[0]?.textContent?.trim() || el.getAttribute('aria-label')?.trim() || el.name || ''
+                    : el.value.trim();
+                  vals = v ? [v] : [];
+                }
+                const label = el.name || el.labels?.[0]?.textContent?.trim() || el.getAttribute('aria-label')?.trim() || el.getAttribute('placeholder')?.trim() || el.tagName.toLowerCase();
+                for (const v of vals) lines.push('  ' + label + ': ' + v.split('\\n').join('\\n    '));
+              }
+              if (lines.length) out.push(key + ':\\n' + lines.join('\\n'));
+            }
+            const text = out.join('\\n\\n');
+            if (!text) {
+              status.textContent = qs.length ? 'No answers to copy yet.' : 'No questions or answers to copy.';
+              return;
+            }
+            status.textContent = '';
+            try {
+              if (typeof navigator.clipboard?.writeText !== 'function') throw new Error('Clipboard API unavailable');
+              await navigator.clipboard.writeText(text);
+              if (copyRun !== btn._lavishCopyRun) return;
+              status.textContent = 'Answers copied.';
+              return;
+            } catch {}
+            if (copyRun !== btn._lavishCopyRun) return;
+            const tmp = document.createElement('textarea');
+            tmp.value = text;
+            tmp.readOnly = true;
+            tmp.setAttribute('aria-hidden', 'true');
+            tmp.style.position = 'fixed';
+            tmp.style.left = '-10000px';
+            document.body.append(tmp);
+            tmp.focus();
+            tmp.select();
+            let ok = false;
+            try { ok = document.execCommand('copy'); } catch {}
+            tmp.remove();
+            if (ok) {
+              status.textContent = 'Answers copied.';
+              return;
+            }
+            btn.parentElement.querySelector('[data-lavish-copy-all-manual]')?.remove();
+            const man = document.createElement('textarea');
+            man.value = text;
+            man.readOnly = true;
+            man.rows = Math.min(12, Math.max(3, text.split('\\n').length));
+            man.setAttribute('aria-label', 'Answers to copy manually');
+            man.dataset.lavishCopyAllManual = '';
+            btn.insertAdjacentElement('afterend', man);
+            man.focus();
+            man.select();
+            status.textContent = 'Clipboard unavailable. Copy the answers below manually.';
+          })(this)">Copy all answers</button>
+          <span data-lavish-copy-all-status role="status" aria-live="polite" class="text-sm"></span>
+        </div>
+      </div>
+
+      <article class="rounded-box bg-base-100 p-5 space-y-4" data-lavish-question="q1-goal">
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="badge badge-primary">Q1</span>
+          <h3 class="text-lg font-semibold">Primary goal for this pass</h3>
+        </div>
+        <p class="text-sm text-base-content/80">
+          What should this customize session optimize for? Later rounds hang off this: look work needs a look goal; bind work needs a bind goal.
+        </p>
+        <form class="space-y-3" onsubmit="event.preventDefault(); const choice = new FormData(event.currentTarget).get('goal'); if (!choice) return; window.lavish.queuePrompt('Q1 answer: ' + choice, { tag: 'grill-round1', text: 'Q1 goal: ' + choice, element: event.currentTarget, queueKey: 'q1-goal', data: { question: 'q1-goal', answer: choice } }); event.currentTarget.querySelector('[data-queued]').textContent = 'Queued: ' + choice;">
+          <label class="flex items-start gap-3 cursor-pointer rounded-box border border-base-content/10 p-3 has-[:checked]:border-primary has-[:checked]:bg-primary/10">
+            <input type="radio" name="goal" value="look-first" class="radio radio-primary mt-1" checked>
+            <span><strong>Look first</strong> — theme, font, padding/opacity on top of current file. Keybinds stay as-is unless broken.</span>
+          </label>
+          <label class="flex items-start gap-3 cursor-pointer rounded-box border border-base-content/10 p-3 has-[:checked]:border-primary has-[:checked]:bg-primary/10">
+            <input type="radio" name="goal" value="binds-first" class="radio radio-primary mt-1">
+            <span><strong>Binds first</strong> — expand keybinds (splits, tabs, agent keys). Visuals later.</span>
+          </label>
+          <label class="flex items-start gap-3 cursor-pointer rounded-box border border-base-content/10 p-3 has-[:checked]:border-primary has-[:checked]:bg-primary/10">
+            <input type="radio" name="goal" value="full-setup" class="radio radio-primary mt-1">
+            <span><strong>Full setup</strong> — look + binds + behavior in one coherent config pass.</span>
+          </label>
+          <label class="flex items-start gap-3 cursor-pointer rounded-box border border-base-content/10 p-3 has-[:checked]:border-primary has-[:checked]:bg-primary/10">
+            <input type="radio" name="goal" value="explain-only" class="radio radio-primary mt-1">
+            <span><strong>Explain only</strong> — teach the knobs; do not edit the file yet.</span>
+          </label>
+          <div class="flex flex-wrap items-center gap-3">
+            <button type="submit" class="btn btn-primary btn-sm">Queue this answer</button>
+            <span data-queued class="text-sm text-base-content/60"></span>
+          </div>
+          <p class="text-sm"><span class="badge badge-soft badge-success">Rec</span> Look first — file already has agent binds; biggest missing piece is theme/font.</p>
+        </form>
+      </article>
+
+      <article class="rounded-box bg-base-100 p-5 space-y-4" data-lavish-question="q2-preserve-binds">
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="badge badge-primary">Q2</span>
+          <h3 class="text-lg font-semibold">Preserve Cursor / Herdr keybinds?</h3>
+        </div>
+        <p class="text-sm text-base-content/80">
+          Current non-negotiables look like <code>shift+enter</code> → CSI-u newline and <code>ctrl+backspace</code> → delete-word. Treat them as sacred, or open to rewrite?
+        </p>
+        <form class="space-y-3" onsubmit="event.preventDefault(); const choice = new FormData(event.currentTarget).get('preserve'); if (!choice) return; window.lavish.queuePrompt('Q2 answer: ' + choice, { tag: 'grill-round1', text: 'Q2 preserve binds: ' + choice, element: event.currentTarget, queueKey: 'q2-preserve-binds', data: { question: 'q2-preserve-binds', answer: choice } }); event.currentTarget.querySelector('[data-queued]').textContent = 'Queued: ' + choice;">
+          <label class="flex items-start gap-3 cursor-pointer rounded-box border border-base-content/10 p-3 has-[:checked]:border-primary has-[:checked]:bg-primary/10">
+            <input type="radio" name="preserve" value="sacred" class="radio radio-primary mt-1" checked>
+            <span><strong>Sacred</strong> — never change those two; add only non-colliding binds.</span>
+          </label>
+          <label class="flex items-start gap-3 cursor-pointer rounded-box border border-base-content/10 p-3 has-[:checked]:border-primary has-[:checked]:bg-primary/10">
+            <input type="radio" name="preserve" value="keep-unless-conflict" class="radio radio-primary mt-1">
+            <span><strong>Keep unless conflict</strong> — prefer keep; allow rewrite if a better agent setup needs it.</span>
+          </label>
+          <label class="flex items-start gap-3 cursor-pointer rounded-box border border-base-content/10 p-3 has-[:checked]:border-primary has-[:checked]:bg-primary/10">
+            <input type="radio" name="preserve" value="rewrite-ok" class="radio radio-primary mt-1">
+            <span><strong>Rewrite OK</strong> — keybinds are fair game.</span>
+          </label>
+          <div class="flex flex-wrap items-center gap-3">
+            <button type="submit" class="btn btn-primary btn-sm">Queue this answer</button>
+            <span data-queued class="text-sm text-base-content/60"></span>
+          </div>
+          <p class="text-sm"><span class="badge badge-soft badge-success">Rec</span> Sacred — comments show intentional Cursor/Herdr wiring; do not break agent input.</p>
+        </form>
+      </article>
+
+      <article class="rounded-box bg-base-100 p-5 space-y-4" data-lavish-question="q3-look">
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="badge badge-primary">Q3</span>
+          <h3 class="text-lg font-semibold">Look direction</h3>
+        </div>
+        <p class="text-sm text-base-content/80">
+          Ghostty themes are plain config snippets (<code>ghostty +list-themes</code>). Dual light/dark via <code>theme = light:…,dark:…</code>. Pick the direction for the next round’s theme shortlist.
+        </p>
+        <form class="space-y-3" onsubmit="event.preventDefault(); const choice = new FormData(event.currentTarget).get('look'); if (!choice) return; window.lavish.queuePrompt('Q3 answer: ' + choice, { tag: 'grill-round1', text: 'Q3 look: ' + choice, element: event.currentTarget, queueKey: 'q3-look', data: { question: 'q3-look', answer: choice } }); event.currentTarget.querySelector('[data-queued]').textContent = 'Queued: ' + choice;">
+          <label class="flex items-start gap-3 cursor-pointer rounded-box border border-base-content/10 p-3 has-[:checked]:border-primary has-[:checked]:bg-primary/10">
+            <input type="radio" name="look" value="dark-only" class="radio radio-primary mt-1" checked>
+            <span><strong>Dark only</strong> — one dark theme; ignore system light mode.</span>
+          </label>
+          <label class="flex items-start gap-3 cursor-pointer rounded-box border border-base-content/10 p-3 has-[:checked]:border-primary has-[:checked]:bg-primary/10">
+            <input type="radio" name="look" value="dual-auto" class="radio radio-primary mt-1">
+            <span><strong>Dual auto</strong> — light + dark pair follows system appearance.</span>
+          </label>
+          <label class="flex items-start gap-3 cursor-pointer rounded-box border border-base-content/10 p-3 has-[:checked]:border-primary has-[:checked]:bg-primary/10">
+            <input type="radio" name="look" value="light-only" class="radio radio-primary mt-1">
+            <span><strong>Light only</strong> — one light theme.</span>
+          </label>
+          <label class="flex items-start gap-3 cursor-pointer rounded-box border border-base-content/10 p-3 has-[:checked]:border-primary has-[:checked]:bg-primary/10">
+            <input type="radio" name="look" value="defer-look" class="radio radio-primary mt-1">
+            <span><strong>Defer look</strong> — no theme work until binds/behavior settle.</span>
+          </label>
+          <div class="flex flex-wrap items-center gap-3">
+            <button type="submit" class="btn btn-primary btn-sm">Queue this answer</button>
+            <span data-queued class="text-sm text-base-content/60"></span>
+          </div>
+          <p class="text-sm"><span class="badge badge-soft badge-success">Rec</span> Dark only — simplest; GTK tip build; you can add dual later without redoing fonts.</p>
+        </form>
+      </article>
+
+      <article class="rounded-box bg-base-100 p-5 space-y-4" data-lavish-question="q4-depth">
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="badge badge-primary">Q4</span>
+          <h3 class="text-lg font-semibold">How deep this pass?</h3>
+        </div>
+        <p class="text-sm text-base-content/80">
+          Depth sets whether we stop at stock themes/fonts or open custom theme files, config includes, and GPU/window tuning.
+        </p>
+        <form class="space-y-3" onsubmit="event.preventDefault(); const choice = new FormData(event.currentTarget).get('depth'); if (!choice) return; window.lavish.queuePrompt('Q4 answer: ' + choice, { tag: 'grill-round1', text: 'Q4 depth: ' + choice, element: event.currentTarget, queueKey: 'q4-depth', data: { question: 'q4-depth', answer: choice } }); event.currentTarget.querySelector('[data-queued]').textContent = 'Queued: ' + choice;">
+          <label class="flex items-start gap-3 cursor-pointer rounded-box border border-base-content/10 p-3 has-[:checked]:border-primary has-[:checked]:bg-primary/10">
+            <input type="radio" name="depth" value="quick-polish" class="radio radio-primary mt-1" checked>
+            <span><strong>Quick polish</strong> — edit the existing file with stock theme + font + a few options.</span>
+          </label>
+          <label class="flex items-start gap-3 cursor-pointer rounded-box border border-base-content/10 p-3 has-[:checked]:border-primary has-[:checked]:bg-primary/10">
+            <input type="radio" name="depth" value="personal-kit" class="radio radio-primary mt-1">
+            <span><strong>Personal kit</strong> — themes dir, maybe <code>config-file</code> includes, curated bind set.</span>
+          </label>
+          <label class="flex items-start gap-3 cursor-pointer rounded-box border border-base-content/10 p-3 has-[:checked]:border-primary has-[:checked]:bg-primary/10">
+            <input type="radio" name="depth" value="dotfiles-grade" class="radio radio-primary mt-1">
+            <span><strong>Dotfiles-grade</strong> — portable layout ready to sync; document every choice.</span>
+          </label>
+          <div class="flex flex-wrap items-center gap-3">
+            <button type="submit" class="btn btn-primary btn-sm">Queue this answer</button>
+            <span data-queued class="text-sm text-base-content/60"></span>
+          </div>
+          <p class="text-sm"><span class="badge badge-soft badge-success">Rec</span> Quick polish — small existing file; get a good daily look without overbuilding.</p>
+        </form>
+      </article>
+    </section>
+
+    <footer class="rounded-box bg-base-100 p-5 space-y-2 text-sm text-base-content/75">
+      <p><strong>After this round:</strong> theme shortlist, font pick, and (if needed) bind additions unlock. No config edits until the tree is settled and you confirm shared understanding.</p>
+      <p>Edit path remains <code>~/.config/ghostty/config</code>. Docs: <a class="link" href="https://ghostty.org/docs/config" target="_blank" rel="noreferrer">ghostty.org/docs/config</a>.</p>
+    </footer>
+  </main>
+</body>
+</html>
