@@ -17,7 +17,7 @@ Single-context layout (`GLOSSARY.md` + `docs/adr/`). See `docs/agents/domain.md`
 - `src/bondwise/simulator.py` — pure bond portfolio simulator (`simulate`)
 - `src/bondwise/params.py` — offer constants / injectable `ProductParams` (COI1030, EDO1036)
 - `src/bondwise/app.py` — Streamlit adapter
-- `src/bondwise/chart.py` — matplotlib twin-axis adapter
+- `src/bondwise/chart.py` — matplotlib grouped stacked-bar adapter (lump sum + profit)
 
 ### Tests
 

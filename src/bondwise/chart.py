@@ -17,6 +17,7 @@ def build_chart(result: SimulationResult, *, lump_sum: float) -> Figure:
     years = [p.year for p in result.coi.years]
     coi_wallet = [p.wallet for p in result.coi.years]
     edo_wallet = [p.wallet for p in result.edo.years]
+    # Presentation stack: profit = wallet − initial lump sum (GLOSSARY Profit).
     coi_profit = [w - lump_sum for w in coi_wallet]
     edo_profit = [w - lump_sum for w in edo_wallet]
     coi_rolls = [p.year for p in result.coi.years if p.is_roll]
@@ -25,29 +26,43 @@ def build_chart(result: SimulationResult, *, lump_sum: float) -> Figure:
     n = len(years)
     x = list(range(n))
     width = 0.35
-    base = [lump_sum] * n
+    lump_sum_heights = [lump_sum] * n
 
     fig, ax = plt.subplots(figsize=(10, 5))
 
     coi_x = [i - width / 2 for i in x]
     edo_x = [i + width / 2 for i in x]
 
-    ax.bar(coi_x, base, width, color=LUMP_COLOR, edgecolor="white", linewidth=0.5)
+    ax.bar(
+        coi_x,
+        lump_sum_heights,
+        width,
+        color=LUMP_COLOR,
+        edgecolor="white",
+        linewidth=0.5,
+    )
     ax.bar(
         coi_x,
         coi_profit,
         width,
-        bottom=base,
+        bottom=lump_sum_heights,
         color=COI_COLOR,
         edgecolor="white",
         linewidth=0.5,
     )
-    ax.bar(edo_x, base, width, color=LUMP_COLOR, edgecolor="white", linewidth=0.5)
+    ax.bar(
+        edo_x,
+        lump_sum_heights,
+        width,
+        color=LUMP_COLOR,
+        edgecolor="white",
+        linewidth=0.5,
+    )
     ax.bar(
         edo_x,
         edo_profit,
         width,
-        bottom=base,
+        bottom=lump_sum_heights,
         color=EDO_COLOR,
         edgecolor="white",
         linewidth=0.5,

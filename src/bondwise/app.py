@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
+from typing import Any
+
 import streamlit as st
 
 from bondwise.chart import build_chart
@@ -25,20 +28,64 @@ def _init_control_state() -> None:
         st.session_state.inflation_pct = _INFLATION_DEFAULT
 
 
-def _sync_lump_from_slider() -> None:
-    st.session_state.lump_sum = st.session_state.lump_sum_slider
+def _snap_to_step(value: Any, min_value: Any, max_value: Any, step: Any) -> Any:
+    """Nearest in-range step value (for slider widgets that cannot hold every int)."""
+    steps = round((float(value) - float(min_value)) / float(step))
+    snapped = float(min_value) + steps * float(step)
+    snapped = max(float(min_value), min(float(max_value), snapped))
+    if isinstance(step, int) and isinstance(min_value, int):
+        return int(round(snapped))
+    return snapped
 
 
-def _sync_lump_from_number() -> None:
-    st.session_state.lump_sum = int(st.session_state.lump_sum_number)
+def _synced_slider_number(
+    *,
+    label: str,
+    canonical_key: str,
+    slider_key: str,
+    number_key: str,
+    min_value: Any,
+    max_value: Any,
+    slider_step: Any,
+    number_step: Any,
+    coerce: Callable[[Any], Any],
+    number_format: str | None = None,
+) -> Any:
+    """Render a slider paired with a synced number_input; return canonical value."""
 
+    def _from_slider() -> None:
+        st.session_state[canonical_key] = coerce(st.session_state[slider_key])
 
-def _sync_inflation_from_slider() -> None:
-    st.session_state.inflation_pct = float(st.session_state.inflation_pct_slider)
+    def _from_number() -> None:
+        st.session_state[canonical_key] = coerce(st.session_state[number_key])
 
-
-def _sync_inflation_from_number() -> None:
-    st.session_state.inflation_pct = float(st.session_state.inflation_pct_number)
+    canonical = coerce(st.session_state[canonical_key])
+    st.session_state[slider_key] = _snap_to_step(
+        canonical, min_value, max_value, slider_step
+    )
+    st.session_state[number_key] = canonical
+    cols = st.columns([3, 1])
+    cols[0].slider(
+        label,
+        min_value=min_value,
+        max_value=max_value,
+        step=slider_step,
+        key=slider_key,
+        on_change=_from_slider,
+    )
+    number_kwargs: dict[str, Any] = {
+        "label": f"{label} exact",
+        "min_value": min_value,
+        "max_value": max_value,
+        "step": number_step,
+        "key": number_key,
+        "on_change": _from_number,
+        "label_visibility": "collapsed",
+    }
+    if number_format is not None:
+        number_kwargs["format"] = number_format
+    cols[1].number_input(**number_kwargs)
+    return coerce(st.session_state[canonical_key])
 
 
 def main() -> None:
@@ -49,53 +96,30 @@ def main() -> None:
     _init_control_state()
 
     with st.sidebar:
-        st.session_state.lump_sum_slider = st.session_state.lump_sum
-        st.session_state.lump_sum_number = st.session_state.lump_sum
-        amount_cols = st.columns([3, 1])
-        amount_cols[0].slider(
-            "Lump sum (PLN)",
+        amount = _synced_slider_number(
+            label="Lump sum (PLN)",
+            canonical_key="lump_sum",
+            slider_key="lump_sum_slider",
+            number_key="lump_sum_number",
             min_value=_AMOUNT_MIN,
             max_value=_AMOUNT_MAX,
-            step=_AMOUNT_STEP,
-            key="lump_sum_slider",
-            on_change=_sync_lump_from_slider,
+            slider_step=_AMOUNT_STEP,
+            number_step=1,
+            coerce=int,
         )
-        amount_cols[1].number_input(
-            "Lump sum exact",
-            min_value=_AMOUNT_MIN,
-            max_value=_AMOUNT_MAX,
-            step=_AMOUNT_STEP,
-            key="lump_sum_number",
-            on_change=_sync_lump_from_number,
-            label_visibility="collapsed",
-        )
-        amount = int(st.session_state.lump_sum)
-
         horizon = st.slider("Horizon (years)", min_value=1, max_value=20, value=8)
-
-        st.session_state.inflation_pct_slider = st.session_state.inflation_pct
-        st.session_state.inflation_pct_number = st.session_state.inflation_pct
-        inflation_cols = st.columns([3, 1])
-        inflation_cols[0].slider(
-            "Assumed future inflation (%)",
+        inflation_pct = _synced_slider_number(
+            label="Assumed future inflation (%)",
+            canonical_key="inflation_pct",
+            slider_key="inflation_pct_slider",
+            number_key="inflation_pct_number",
             min_value=_INFLATION_MIN,
             max_value=_INFLATION_MAX,
-            step=_INFLATION_STEP,
-            key="inflation_pct_slider",
-            on_change=_sync_inflation_from_slider,
+            slider_step=_INFLATION_STEP,
+            number_step=_INFLATION_STEP,
+            coerce=float,
+            number_format="%.1f",
         )
-        inflation_cols[1].number_input(
-            "Inflation exact",
-            min_value=_INFLATION_MIN,
-            max_value=_INFLATION_MAX,
-            step=_INFLATION_STEP,
-            key="inflation_pct_number",
-            on_change=_sync_inflation_from_number,
-            label_visibility="collapsed",
-            format="%.1f",
-        )
-        inflation_pct = float(st.session_state.inflation_pct)
-
         belka = st.checkbox("Apply Belka tax (19%)", value=True)
 
     result = simulate(
