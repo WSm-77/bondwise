@@ -1,0 +1,25 @@
+{
+  "source": "obligacjeskarbowe.pl + NotebookLM \"Obligacje 10-letnie EDO: Oferta Skarbowa\"",
+  "offer_window": "October 2026",
+  "verified_at": "2026-11-10",
+  "face_value": 100.0,
+  "belka_rate": 0.19,
+  "products": {
+    "COI": {
+      "code": "COI1030",
+      "year1_rate": 0.0475,
+      "margin": 0.015,
+      "early_exit_fee_per_bond": 2.0,
+      "maturity_years": 4,
+      "fee_uncapped_after_year1": true
+    },
+    "EDO": {
+      "code": "EDO1036",
+      "year1_rate": 0.0535,
+      "margin": 0.02,
+      "early_exit_fee_per_bond": 3.0,
+      "maturity_years": 10,
+      "fee_uncapped_after_year1": false
+    }
+  }
+}

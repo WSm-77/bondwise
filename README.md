@@ -5,14 +5,15 @@ Compare Polish Treasury inflation-linked retail bonds — **4-year COI** vs **10
 ## Run
 
 ```bash
-uv sync --extra dev
-uv run pytest
+make test
 uv run streamlit run src/bondwise/app.py
 ```
 
+`make test` runs `uv sync --extra dev && uv run pytest` (one copy-paste command).
+
 ## Series source
 
-Default product parameters match the official October 2026 offer window for series **COI1030** and **EDO1036** on [obligacjeskarbowe.pl](https://www.obligacjeskarbowe.pl/), cross-checked against the NotebookLM research notebook “Obligacje 10-letnie EDO: Oferta Skarbowa”. Year-1 rates, margins, early-exit fees, and Belka (19%) live in `src/bondwise/params.py`.
+Default product parameters match the official October 2026 offer window for series **COI1030** and **EDO1036** on [obligacjeskarbowe.pl](https://www.obligacjeskarbowe.pl/), cross-checked against the NotebookLM research notebook “Obligacje 10-letnie EDO: Oferta Skarbowa”. Year-1 rates, margins, early-exit fees, and Belka (19%) live in `src/bondwise/params.py`. To refresh or verify those constants against the source, see `docs/agents/offer-params-refresh.md`.
 
 ## Model limits (v1)
 
