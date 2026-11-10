@@ -180,11 +180,11 @@ def _simulate_edo(
     year_in_cycle = 0
     # Accrued capitalized interest outstanding (pre-fee, pre-tax).
     accrued = 0.0
-    # Compounding basis per portfolio of bonds (face * bonds grows with capitalization).
+    # Compounding basis grows with annual capitalization.
     basis = _money(bonds * FACE_VALUE)
 
     for year in range(1, horizon_years + 1):
-        if bonds == 0:
+        if bonds == 0 and idle < FACE_VALUE:
             points.append(
                 YearPoint(
                     year=year,
@@ -196,6 +196,12 @@ def _simulate_edo(
             )
             continue
 
+        if bonds == 0:
+            bonds, idle = _buy_bonds(idle, bonds)
+            basis = _money(bonds * FACE_VALUE)
+            accrued = 0.0
+            year_in_cycle = 0
+
         year_in_cycle += 1
         rate = _rate_for_year(product, year_in_cycle, inflation)
         year_interest = _money(basis * rate)
@@ -205,7 +211,27 @@ def _simulate_edo(
         at_horizon = year == horizon_years
         at_maturity = year_in_cycle == product.maturity_years
 
-        if at_horizon and not at_maturity:
+        if at_maturity:
+            # Maturity: pay capitalized interest (no fee); roll proceeds into new EDO.
+            net = _apply_belka(accrued, belka)
+            idle = _money(idle + bonds * FACE_VALUE + net)
+            bonds = 0
+            accrued = 0.0
+            basis = 0.0
+            year_in_cycle = 0
+            bonds, idle = _buy_bonds(idle, bonds)
+            basis = _money(bonds * FACE_VALUE)
+            points.append(
+                YearPoint(
+                    year=year,
+                    wallet=_money(basis + idle),
+                    income=net,
+                    bonds=bonds,
+                    idle_cash=idle,
+                    is_roll=True,
+                )
+            )
+        elif at_horizon:
             fee = _money(_early_exit_fee(product, bonds, accrued, year_in_cycle))
             after_fee = _money(accrued - fee)
             net = _apply_belka(after_fee, belka)
@@ -224,22 +250,6 @@ def _simulate_edo(
             accrued = 0.0
             basis = 0.0
             year_in_cycle = 0
-        elif at_maturity:
-            net = _apply_belka(accrued, belka)
-            idle = _money(idle + bonds * FACE_VALUE + net)
-            bonds = 0
-            accrued = 0.0
-            basis = 0.0
-            year_in_cycle = 0
-            points.append(
-                YearPoint(
-                    year=year,
-                    wallet=idle,
-                    income=net,
-                    bonds=0,
-                    idle_cash=idle,
-                )
-            )
         else:
             # Hold: interest stays capitalized inside the bond.
             points.append(
