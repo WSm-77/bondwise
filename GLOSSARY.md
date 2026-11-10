@@ -13,5 +13,6 @@ Terms from the shipped MVP (README, public `params` / `simulator` API). No specu
 | **Margin** | Post-year-1 additive rate used with inflation (`margin + max(inflation, 0)`). |
 | **ProductParams** | Injectable offer constants for one series (`code`, `year1_rate`, `margin`, fees, maturity, fee-cap flag). |
 | **Roll** | At maturity, reinvest available proceeds into a new cycle of the same product (COI every 4y, EDO every 10y). |
+| **Profit** | Cumulative gain: wallet − initial lump sum. Distinct from **income** (that year’s fee-reduced payout). |
 | **Wallet** | Portfolio value at a year point (bonds + idle cash); income is the fee-reduced payout metric for that year. |
 | **Year-1 rate** | Fixed coupon/interest rate for the first year of a cycle (`year1_rate`); later years use margin + inflation. |

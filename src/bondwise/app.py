@@ -45,7 +45,7 @@ def main() -> None:
     profit_edo.metric("EDO profit", f"{result.edo.profit:,.2f} PLN")
     delta.metric("Δ EDO − COI", f"{result.delta_edo_minus_coi:,.2f} PLN")
 
-    st.pyplot(build_chart(result), clear_figure=True)
+    st.pyplot(build_chart(result, lump_sum=float(amount)), clear_figure=True)
 
     rows = []
     for coi_y, edo_y in zip(result.coi.years, result.edo.years, strict=True):
