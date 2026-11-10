@@ -14,16 +14,17 @@ def main() -> None:
     st.caption("COI vs EDO retail bond profit simulator")
 
     with st.sidebar:
-        amount = st.number_input(
+        amount = st.slider(
             "Lump sum (PLN)",
-            min_value=0.0,
-            value=10_000.0,
-            step=100.0,
+            min_value=0,
+            max_value=500_000,
+            value=10_000,
+            step=100,
         )
         horizon = st.slider("Horizon (years)", min_value=1, max_value=20, value=8)
         inflation_pct = st.slider(
             "Assumed future inflation (%)",
-            min_value=-5.0,
+            min_value=0.0,
             max_value=15.0,
             value=2.5,
             step=0.1,
@@ -31,17 +32,18 @@ def main() -> None:
         belka = st.checkbox("Apply Belka tax (19%)", value=True)
 
     result = simulate(
-        lump_sum=amount,
+        lump_sum=float(amount),
         horizon_years=horizon,
         inflation=inflation_pct / 100.0,
         belka=belka,
     )
 
-    k1, k2, k3, k4 = st.columns(4)
-    k1.metric("COI final wallet", f"{result.coi.final_wallet:,.2f} PLN")
-    k2.metric("EDO final wallet", f"{result.edo.final_wallet:,.2f} PLN")
-    k3.metric("COI profit", f"{result.coi.profit:,.2f} PLN")
-    k4.metric("Δ EDO − COI", f"{result.delta_edo_minus_coi:,.2f} PLN")
+    wallet_coi, wallet_edo, profit_coi, profit_edo, delta = st.columns(5)
+    wallet_coi.metric("COI final wallet", f"{result.coi.final_wallet:,.2f} PLN")
+    wallet_edo.metric("EDO final wallet", f"{result.edo.final_wallet:,.2f} PLN")
+    profit_coi.metric("COI profit", f"{result.coi.profit:,.2f} PLN")
+    profit_edo.metric("EDO profit", f"{result.edo.profit:,.2f} PLN")
+    delta.metric("Δ EDO − COI", f"{result.delta_edo_minus_coi:,.2f} PLN")
 
     st.pyplot(build_chart(result), clear_figure=True)
 
@@ -53,10 +55,12 @@ def main() -> None:
                 "COI wallet": coi_y.wallet,
                 "COI income": coi_y.income,
                 "COI bonds": coi_y.bonds,
+                "COI idle": coi_y.idle_cash,
                 "COI roll": coi_y.is_roll,
                 "EDO wallet": edo_y.wallet,
                 "EDO income": edo_y.income,
                 "EDO bonds": edo_y.bonds,
+                "EDO idle": edo_y.idle_cash,
                 "EDO roll": edo_y.is_roll,
             }
         )

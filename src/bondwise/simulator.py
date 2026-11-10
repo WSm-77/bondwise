@@ -82,8 +82,8 @@ def _simulate_coi(
     horizon_years: int,
     inflation: float,
     belka: bool,
+    product: ProductParams = COI,
 ) -> ProductPath:
-    product = COI
     bonds, idle = _floor_bonds(lump_sum)
     points: list[YearPoint] = []
     year_in_cycle = 0
@@ -173,8 +173,8 @@ def _simulate_edo(
     horizon_years: int,
     inflation: float,
     belka: bool,
+    product: ProductParams = EDO,
 ) -> ProductPath:
-    product = EDO
     bonds, idle = _floor_bonds(lump_sum)
     points: list[YearPoint] = []
     year_in_cycle = 0
@@ -275,11 +275,13 @@ def simulate(
     horizon_years: int = 1,
     inflation: float = 0.0,
     belka: bool = True,
+    coi: ProductParams = COI,
+    edo: ProductParams = EDO,
 ) -> SimulationResult:
-    coi = _simulate_coi(lump_sum, horizon_years, inflation, belka)
-    edo = _simulate_edo(lump_sum, horizon_years, inflation, belka)
+    coi_path = _simulate_coi(lump_sum, horizon_years, inflation, belka, coi)
+    edo_path = _simulate_edo(lump_sum, horizon_years, inflation, belka, edo)
     return SimulationResult(
-        coi=coi,
-        edo=edo,
-        delta_edo_minus_coi=_money(edo.final_wallet - coi.final_wallet),
+        coi=coi_path,
+        edo=edo_path,
+        delta_edo_minus_coi=_money(edo_path.final_wallet - coi_path.final_wallet),
     )

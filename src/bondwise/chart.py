@@ -49,7 +49,7 @@ def build_chart(result: SimulationResult) -> Figure:
 
     ax_wallet.set_xlabel("Year")
     ax_wallet.set_ylabel("Wallet (PLN)")
-    ax_income.set_ylabel("Fee-reduced income (PLN)")
+    ax_income.set_ylabel("Income (coupons / exit, PLN)")
     ax_wallet.set_title("COI vs EDO — wallet and income")
 
     lines_l, labels_l = ax_wallet.get_legend_handles_labels()
