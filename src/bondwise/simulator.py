@@ -8,12 +8,24 @@ from bondwise.params import BELKA_RATE, COI, EDO, FACE_VALUE, ProductParams
 
 
 @dataclass(frozen=True)
+class ExitSnapshot:
+    """Counterfactual redeem-at-end-of-year-N economics (pre-hold/roll)."""
+
+    fee: float
+    tax: float
+    income: float
+    cash_out: float
+    profit: float
+
+
+@dataclass(frozen=True)
 class YearPoint:
     year: int
     wallet: float
     income: float
     bonds: int
     idle_cash: float
+    exit: ExitSnapshot
     is_roll: bool = False
 
 
@@ -68,6 +80,53 @@ def _early_exit_fee(
     return min(raw, max(interest, 0.0))
 
 
+def _exit_tax(after_fee: float, net: float, belka: bool) -> float:
+    if not belka or after_fee <= 0:
+        return 0.0
+    return _money(after_fee - net)
+
+
+def _make_exit(
+    *,
+    lump_sum: float,
+    bonds: int,
+    idle: float,
+    interest_base: float,
+    year_in_cycle: int,
+    at_maturity: bool,
+    belka: bool,
+    product: ProductParams,
+) -> ExitSnapshot:
+    fee = (
+        0.0
+        if at_maturity
+        else _money(_early_exit_fee(product, bonds, interest_base, year_in_cycle))
+    )
+    after_fee = _money(interest_base - fee)
+    income = _apply_belka(after_fee, belka)
+    tax = _exit_tax(after_fee, income, belka)
+    cash_out = _money(bonds * FACE_VALUE + idle + income)
+    profit = _money(cash_out - lump_sum)
+    return ExitSnapshot(
+        fee=fee,
+        tax=tax,
+        income=income,
+        cash_out=cash_out,
+        profit=profit,
+    )
+
+
+def _idle_only_exit(lump_sum: float, idle: float) -> ExitSnapshot:
+    cash_out = _money(idle)
+    return ExitSnapshot(
+        fee=0.0,
+        tax=0.0,
+        income=0.0,
+        cash_out=cash_out,
+        profit=_money(cash_out - lump_sum),
+    )
+
+
 def _buy_bonds(idle: float, bonds: int) -> tuple[int, float]:
     bought = int(idle // FACE_VALUE)
     if bought <= 0:
@@ -97,6 +156,7 @@ def _simulate_coi(
                     income=0.0,
                     bonds=0,
                     idle_cash=_money(idle),
+                    exit=_idle_only_exit(lump_sum, idle),
                 )
             )
             continue
@@ -110,6 +170,16 @@ def _simulate_coi(
         interest = _money(bonds * FACE_VALUE * rate)
         at_horizon = year == horizon_years
         at_maturity = year_in_cycle == product.maturity_years
+        exit_snap = _make_exit(
+            lump_sum=lump_sum,
+            bonds=bonds,
+            idle=idle,
+            interest_base=interest,
+            year_in_cycle=year_in_cycle,
+            at_maturity=at_maturity,
+            belka=belka,
+            product=product,
+        )
 
         if at_maturity:
             # Maturity: full coupon, no fee; reinvest all proceeds into a new COI cycle.
@@ -126,6 +196,7 @@ def _simulate_coi(
                     bonds=bonds,
                     idle_cash=idle,
                     is_roll=True,
+                    exit=exit_snap,
                 )
             )
         elif at_horizon:
@@ -140,6 +211,7 @@ def _simulate_coi(
                     income=net,
                     bonds=bonds,
                     idle_cash=_money(idle),
+                    exit=exit_snap,
                 )
             )
             idle = wallet
@@ -157,6 +229,7 @@ def _simulate_coi(
                     income=net,
                     bonds=bonds,
                     idle_cash=idle,
+                    exit=exit_snap,
                 )
             )
 
@@ -192,6 +265,7 @@ def _simulate_edo(
                     income=0.0,
                     bonds=0,
                     idle_cash=_money(idle),
+                    exit=_idle_only_exit(lump_sum, idle),
                 )
             )
             continue
@@ -210,6 +284,16 @@ def _simulate_edo(
 
         at_horizon = year == horizon_years
         at_maturity = year_in_cycle == product.maturity_years
+        exit_snap = _make_exit(
+            lump_sum=lump_sum,
+            bonds=bonds,
+            idle=idle,
+            interest_base=accrued,
+            year_in_cycle=year_in_cycle,
+            at_maturity=at_maturity,
+            belka=belka,
+            product=product,
+        )
 
         if at_maturity:
             # Maturity: pay capitalized interest (no fee); roll proceeds into new EDO.
@@ -229,6 +313,7 @@ def _simulate_edo(
                     bonds=bonds,
                     idle_cash=idle,
                     is_roll=True,
+                    exit=exit_snap,
                 )
             )
         elif at_horizon:
@@ -243,6 +328,7 @@ def _simulate_edo(
                     income=net,
                     bonds=bonds,
                     idle_cash=_money(idle),
+                    exit=exit_snap,
                 )
             )
             idle = wallet
@@ -259,6 +345,7 @@ def _simulate_edo(
                     income=0.0,
                     bonds=bonds,
                     idle_cash=_money(idle),
+                    exit=exit_snap,
                 )
             )
 
