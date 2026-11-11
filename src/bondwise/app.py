@@ -148,11 +148,19 @@ def main() -> None:
                 "COI bonds": coi_y.bonds,
                 "COI idle": coi_y.idle_cash,
                 "COI roll": coi_y.is_roll,
+                "COI exit fee": coi_y.exit.fee,
+                "COI exit tax": coi_y.exit.tax,
+                "COI exit income": coi_y.exit.income,
+                "COI exit profit": coi_y.exit.profit,
                 "EDO wallet": edo_y.wallet,
                 "EDO income": edo_y.income,
                 "EDO bonds": edo_y.bonds,
                 "EDO idle": edo_y.idle_cash,
                 "EDO roll": edo_y.is_roll,
+                "EDO exit fee": edo_y.exit.fee,
+                "EDO exit tax": edo_y.exit.tax,
+                "EDO exit income": edo_y.exit.income,
+                "EDO exit profit": edo_y.exit.profit,
             }
         )
     with st.expander("Year-by-year table", expanded=False):
