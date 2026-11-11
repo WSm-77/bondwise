@@ -1,59 +1,89 @@
-"""Matplotlib combo twin-axis chart for COI vs EDO paths."""
+"""Matplotlib grouped stacked-bar chart: lump sum + profit for COI vs EDO."""
 
 from __future__ import annotations
 
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
+from matplotlib.patches import Patch
 
 from bondwise.simulator import SimulationResult
 
 COI_COLOR = "#1f77b4"
 EDO_COLOR = "#d62728"
+LUMP_COLOR = "#c7c7c7"
 
 
-def build_chart(result: SimulationResult) -> Figure:
+def build_chart(result: SimulationResult, *, lump_sum: float) -> Figure:
     years = [p.year for p in result.coi.years]
     coi_wallet = [p.wallet for p in result.coi.years]
     edo_wallet = [p.wallet for p in result.edo.years]
-    coi_income = [p.income for p in result.coi.years]
-    edo_income = [p.income for p in result.edo.years]
+    # Presentation stack: profit = wallet − initial lump sum (GLOSSARY Profit).
+    coi_profit = [w - lump_sum for w in coi_wallet]
+    edo_profit = [w - lump_sum for w in edo_wallet]
     coi_rolls = [p.year for p in result.coi.years if p.is_roll]
     edo_rolls = [p.year for p in result.edo.years if p.is_roll]
 
-    fig, ax_wallet = plt.subplots(figsize=(10, 5))
-    ax_income = ax_wallet.twinx()
+    n = len(years)
+    x = list(range(n))
+    width = 0.35
+    lump_sum_heights = [lump_sum] * n
 
-    ax_wallet.plot(years, coi_wallet, color=COI_COLOR, linewidth=2, label="COI wallet")
-    ax_wallet.plot(years, edo_wallet, color=EDO_COLOR, linewidth=2, label="EDO wallet")
-    ax_income.plot(
-        years,
-        coi_income,
-        color=COI_COLOR,
-        linestyle="--",
-        alpha=0.7,
-        label="COI income",
+    fig, ax = plt.subplots(figsize=(10, 5))
+
+    coi_x = [i - width / 2 for i in x]
+    edo_x = [i + width / 2 for i in x]
+
+    ax.bar(
+        coi_x,
+        lump_sum_heights,
+        width,
+        color=LUMP_COLOR,
+        edgecolor="white",
+        linewidth=0.5,
     )
-    ax_income.plot(
-        years,
-        edo_income,
+    ax.bar(
+        coi_x,
+        coi_profit,
+        width,
+        bottom=lump_sum_heights,
+        color=COI_COLOR,
+        edgecolor="white",
+        linewidth=0.5,
+    )
+    ax.bar(
+        edo_x,
+        lump_sum_heights,
+        width,
+        color=LUMP_COLOR,
+        edgecolor="white",
+        linewidth=0.5,
+    )
+    ax.bar(
+        edo_x,
+        edo_profit,
+        width,
+        bottom=lump_sum_heights,
         color=EDO_COLOR,
-        linestyle="--",
-        alpha=0.7,
-        label="EDO income",
+        edgecolor="white",
+        linewidth=0.5,
     )
 
     for y in coi_rolls:
-        ax_wallet.axvline(y, color=COI_COLOR, alpha=0.25, linestyle=":")
+        ax.axvline(years.index(y), color=COI_COLOR, alpha=0.25, linestyle=":")
     for y in edo_rolls:
-        ax_wallet.axvline(y, color=EDO_COLOR, alpha=0.25, linestyle=":")
+        ax.axvline(years.index(y), color=EDO_COLOR, alpha=0.25, linestyle=":")
 
-    ax_wallet.set_xlabel("Year")
-    ax_wallet.set_ylabel("Wallet (PLN)")
-    ax_income.set_ylabel("Income (coupons / exit, PLN)")
-    ax_wallet.set_title("COI vs EDO — wallet and income")
+    ax.set_xticks(x)
+    ax.set_xticklabels([str(y) for y in years])
+    ax.set_xlabel("Year")
+    ax.set_ylabel("Wallet (PLN)")
+    ax.set_title("COI vs EDO — wallet composition (lump sum + profit)")
 
-    lines_l, labels_l = ax_wallet.get_legend_handles_labels()
-    lines_r, labels_r = ax_income.get_legend_handles_labels()
-    ax_wallet.legend(lines_l + lines_r, labels_l + labels_r, loc="upper left")
+    legend = [
+        Patch(facecolor=LUMP_COLOR, edgecolor="white", label="lump sum"),
+        Patch(facecolor=COI_COLOR, edgecolor="white", label="COI profit"),
+        Patch(facecolor=EDO_COLOR, edgecolor="white", label="EDO profit"),
+    ]
+    ax.legend(handles=legend, loc="upper left")
     fig.tight_layout()
     return fig
