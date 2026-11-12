@@ -15,3 +15,5 @@ Put portfolio simulation in `src/bondwise/simulator.py` as a pure function (`sim
 ## Consequences
 
 UI changes do not require browser tests for bond math. Spec slips in the UI still need a separate reviewer checklist.
+
+The thin UI adapter is the static Pages shell (`web/`) plus Pyodide loading pure `simulate`. Streamlit (`app.py`) and matplotlib (`chart.py`) adapters are retired on cutover.

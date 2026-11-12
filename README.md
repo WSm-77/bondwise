@@ -2,14 +2,18 @@
 
 Compare Polish Treasury inflation-linked retail bonds — **4-year COI** vs **10-year EDO** — for a lump-sum investment. Adjust amount, horizon (1–20 years), assumed future inflation, and Belka tax. The app shows wallet growth, fee-reduced income, roll markers, KPIs, and a year-by-year table.
 
+Interactive UI: https://wsm-77.github.io/bondwise/
+
 ## Run
 
 ```bash
 make test
-uv run streamlit run src/bondwise/app.py
+make site && make serve
 ```
 
-`make test` runs `uv sync --extra dev && uv run pytest` (one copy-paste command).
+`make test` runs `uv sync --extra dev && uv run pytest`.  
+`make site` builds the static shell + Pyodide sim zip into gitignored `dist/`.  
+`make serve` serves `dist/` at http://127.0.0.1:8000/ .
 
 ## Series source
 
