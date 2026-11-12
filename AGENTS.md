@@ -16,8 +16,7 @@ Single-context layout (`GLOSSARY.md` + `docs/adr/`). See `docs/agents/domain.md`
 
 - `src/bondwise/simulator.py` — pure bond portfolio simulator (`simulate`)
 - `src/bondwise/params.py` — offer constants / injectable `ProductParams` (COI1030, EDO1036)
-- `src/bondwise/app.py` — Streamlit adapter
-- `src/bondwise/chart.py` — matplotlib grouped stacked-bar adapter (lump sum + profit)
+- `web/` — static Pages shell (HTML/CSS/JS + Chart.js); Pyodide loads `simulate`
 
 ### Tests
 
@@ -25,4 +24,4 @@ One command (installs test deps + pytest): `make test`
 
 ### Review
 
-Streamlit AC + injectable params: `docs/agents/streamlit-review-checklist.md`. Offer-params refresh: `docs/agents/offer-params-refresh.md`.
+Offer-params refresh: `docs/agents/offer-params-refresh.md`.
