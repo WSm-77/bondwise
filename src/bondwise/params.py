@@ -35,3 +35,19 @@ EDO = ProductParams(
     maturity_years=10,
     fee_uncapped_after_year1=False,
 )
+
+# Hypothetical later COI window used only by the offer-refresh demo schedule.
+# Not a live obligacjeskarbowe.pl series — illustrates roll optionality.
+COI_REFRESH_DEMO_NEXT = ProductParams(
+    code="COI-DEMO-NEXT",
+    year1_rate=0.065,
+    margin=0.025,
+    early_exit_fee_per_bond=2.0,
+    maturity_years=4,
+    fee_uncapped_after_year1=True,
+)
+
+# Cycle-indexed COI offer schedule: [initial buy, first roll, ...].
+# Demo scenario (documented in tests): lump 10_000, horizon 8y, inflation 2.5%,
+# Belka on — fixed COI loses to EDO; this schedule beats EDO after the year-4 roll.
+COI_OFFER_REFRESH_DEMO: tuple[ProductParams, ...] = (COI, COI_REFRESH_DEMO_NEXT)

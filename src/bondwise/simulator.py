@@ -2,9 +2,31 @@
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass
 
 from bondwise.params import BELKA_RATE, COI, EDO, FACE_VALUE, ProductParams
+
+
+def _offer_for_cycle(
+    fixed: ProductParams,
+    schedule: Sequence[ProductParams] | None,
+    cycle_index: int,
+) -> ProductParams:
+    """Resolve ProductParams for a cycle start (initial buy or maturity roll).
+
+    When *schedule* is None, always return *fixed* (blind reinvest / same offer).
+    Otherwise index by cycle (0 = initial); past the end, reuse the last entry.
+    """
+    if schedule is None:
+        return fixed
+    if not schedule:
+        return fixed
+    if cycle_index < 0:
+        cycle_index = 0
+    if cycle_index >= len(schedule):
+        return schedule[-1]
+    return schedule[cycle_index]
 
 
 @dataclass(frozen=True)
@@ -142,10 +164,13 @@ def _simulate_coi(
     inflation: float,
     belka: bool,
     product: ProductParams = COI,
+    offer_schedule: Sequence[ProductParams] | None = None,
 ) -> ProductPath:
     bonds, idle = _floor_bonds(lump_sum)
     points: list[YearPoint] = []
     year_in_cycle = 0
+    cycle_index = 0
+    active = _offer_for_cycle(product, offer_schedule, cycle_index)
 
     for year in range(1, horizon_years + 1):
         if bonds == 0 and idle < FACE_VALUE:
@@ -164,12 +189,13 @@ def _simulate_coi(
         if bonds == 0:
             bonds, idle = _buy_bonds(idle, bonds)
             year_in_cycle = 0
+            active = _offer_for_cycle(product, offer_schedule, cycle_index)
 
         year_in_cycle += 1
-        rate = _rate_for_year(product, year_in_cycle, inflation)
+        rate = _rate_for_year(active, year_in_cycle, inflation)
         interest = _money(bonds * FACE_VALUE * rate)
         at_horizon = year == horizon_years
-        at_maturity = year_in_cycle == product.maturity_years
+        at_maturity = year_in_cycle == active.maturity_years
         exit_snap = _make_exit(
             lump_sum=lump_sum,
             bonds=bonds,
@@ -178,7 +204,7 @@ def _simulate_coi(
             year_in_cycle=year_in_cycle,
             at_maturity=at_maturity,
             belka=belka,
-            product=product,
+            product=active,
         )
 
         if at_maturity:
@@ -187,6 +213,8 @@ def _simulate_coi(
             idle = _money(idle + bonds * FACE_VALUE + net)
             bonds = 0
             year_in_cycle = 0
+            cycle_index += 1
+            active = _offer_for_cycle(product, offer_schedule, cycle_index)
             bonds, idle = _buy_bonds(idle, bonds)
             points.append(
                 YearPoint(
@@ -200,7 +228,7 @@ def _simulate_coi(
                 )
             )
         elif at_horizon:
-            fee = _money(_early_exit_fee(product, bonds, interest, year_in_cycle))
+            fee = _money(_early_exit_fee(active, bonds, interest, year_in_cycle))
             after_fee = _money(interest - fee)
             net = _apply_belka(after_fee, belka)
             wallet = _money(bonds * FACE_VALUE + idle + net)
@@ -364,8 +392,23 @@ def simulate(
     belka: bool = True,
     coi: ProductParams = COI,
     edo: ProductParams = EDO,
+    coi_offer_schedule: Sequence[ProductParams] | None = None,
 ) -> SimulationResult:
-    coi_path = _simulate_coi(lump_sum, horizon_years, inflation, belka, coi)
+    """Simulate COI vs EDO paths.
+
+    Default (*coi_offer_schedule* is None): one fixed COI offer for the whole
+    horizon (blind reinvest). When a schedule is supplied, each new COI cycle
+    (initial buy and each maturity roll) takes the next ``ProductParams`` entry.
+    EDO stays on the fixed *edo* offer.
+    """
+    coi_path = _simulate_coi(
+        lump_sum,
+        horizon_years,
+        inflation,
+        belka,
+        coi,
+        offer_schedule=coi_offer_schedule,
+    )
     edo_path = _simulate_edo(lump_sum, horizon_years, inflation, belka, edo)
     return SimulationResult(
         coi=coi_path,

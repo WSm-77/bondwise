@@ -94,6 +94,22 @@ input[type="number"] {
   margin-top: 0.25rem;
 }
 
+select#offer-mode {
+  width: 100%;
+  font: inherit;
+  padding: 0.25rem 0.35rem;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--ink);
+}
+
+.hint {
+  font-size: 0.7rem;
+  color: var(--muted);
+  margin: 0.25rem 0 0;
+  line-height: 1.35;
+}
+
 .status {
   font-size: 0.8rem;
   color: var(--muted);

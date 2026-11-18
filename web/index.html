@@ -37,6 +37,14 @@
         <input type="checkbox" id="belka" checked />
         Apply Belka tax (19%)
       </label>
+      <div class="ctrl">
+        <label for="offer-mode">COI offers</label>
+        <select id="offer-mode">
+          <option value="fixed" selected>Fixed (blind reinvest)</option>
+          <option value="refresh">Offer refresh (demo schedule)</option>
+        </select>
+        <p class="hint" id="offer-hint">Same COI1030 terms every cycle.</p>
+      </div>
       <p class="status" id="status" role="status">Loading simulator…</p>
     </aside>
     <div class="main">

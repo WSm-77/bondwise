@@ -16,6 +16,8 @@ Terms from the shipped MVP (README, public `params` / `simulator` API). No specu
 | **Idle cash** | Remainder under 100 PLN that earns 0% and is included in wallet totals. |
 | **Margin** | Post-year-1 additive rate used with inflation (`margin + max(inflation, 0)`). |
 | **ProductParams** | Injectable offer constants for one series (`code`, `year1_rate`, `margin`, fees, maturity, fee-cap flag). |
+| **Offer schedule** | Optional sequence of COI `ProductParams` indexed by cycle (0 = initial buy, then each maturity roll). When omitted, the fixed COI offer is reused forever (blind reinvest). |
+| **Offer refresh** | Applying the next entry from an **Offer schedule** at each new COI cycle start instead of locking the same series for the whole horizon. |
 | **Roll** | At maturity, reinvest available proceeds into a new cycle of the same product (COI every 4y, EDO every 10y). |
 | **Profit** | Cumulative gain: wallet − initial lump sum. Distinct from **income** (that year’s fee-reduced payout). |
 | **Wallet** | Portfolio value at a year point (bonds + idle cash); income is the fee-reduced payout metric for that year. |

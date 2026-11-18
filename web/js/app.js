@@ -10,6 +10,8 @@ const els = {
   inf: document.getElementById("inf"),
   infN: document.getElementById("inf-n"),
   belka: document.getElementById("belka"),
+  offerMode: document.getElementById("offer-mode"),
+  offerHint: document.getElementById("offer-hint"),
   status: document.getElementById("status"),
   tableBody: document.getElementById("table-body"),
   kpiCoiWallet: document.getElementById("kpi-coi-wallet"),
@@ -17,6 +19,12 @@ const els = {
   kpiCoiProfit: document.getElementById("kpi-coi-profit"),
   kpiEdoProfit: document.getElementById("kpi-edo-profit"),
   kpiDelta: document.getElementById("kpi-delta"),
+};
+
+const OFFER_HINTS = {
+  fixed: "Same COI1030 terms every cycle.",
+  refresh:
+    "Demo schedule: COI1030 then richer next-window terms at each roll. At default inputs, fixed COI loses to EDO; refresh can beat EDO.",
 };
 
 let chart;
@@ -43,7 +51,12 @@ function readControls() {
     horizon: Number(els.hz.value),
     inflationPct: Number(els.infN.value),
     belka: els.belka.checked,
+    offerMode: els.offerMode.value === "refresh" ? "refresh" : "fixed",
   };
+}
+
+function syncOfferHint(mode) {
+  els.offerHint.textContent = OFFER_HINTS[mode] || OFFER_HINTS.fixed;
 }
 
 function pathFromDict(path, lumpSum) {
@@ -230,17 +243,21 @@ function render(view, lumpSum) {
 function recompute() {
   if (!pyodide) return;
   const token = ++runToken;
-  const { lumpSum, horizon, inflationPct, belka } = readControls();
+  const { lumpSum, horizon, inflationPct, belka, offerMode } = readControls();
   els.hzVal.textContent = String(horizon);
+  syncOfferHint(offerMode);
   try {
     pyodide.globals.set("bw_lump", lumpSum);
     pyodide.globals.set("bw_horizon", horizon);
     pyodide.globals.set("bw_inflation", inflationPct / 100.0);
     pyodide.globals.set("bw_belka", belka);
+    pyodide.globals.set("bw_offer_refresh", offerMode === "refresh");
     const rawJson = pyodide.runPython(`
 import json
 from bondwise import simulate
-_r = simulate(bw_lump, bw_horizon, bw_inflation, bw_belka)
+from bondwise.params import COI_OFFER_REFRESH_DEMO
+_sched = COI_OFFER_REFRESH_DEMO if bw_offer_refresh else None
+_r = simulate(bw_lump, bw_horizon, bw_inflation, bw_belka, coi_offer_schedule=_sched)
 
 def _path(p):
     return {
@@ -267,7 +284,7 @@ json.dumps({
     if (token !== runToken) return;
     const view = resultToView(JSON.parse(rawJson), lumpSum);
     render(view, lumpSum);
-    setStatus("Ready");
+    setStatus(offerMode === "refresh" ? "Ready (offer refresh)" : "Ready");
   } catch (err) {
     console.error(err);
     setStatus(`Simulate failed: ${err}`, true);
@@ -299,6 +316,8 @@ function bindControls() {
     return Math.max(0, Math.min(15, Math.round(n * 10) / 10));
   });
   els.belka.addEventListener("change", recompute);
+  els.offerMode.addEventListener("change", recompute);
+  syncOfferHint(readControls().offerMode);
 }
 
 async function boot() {
