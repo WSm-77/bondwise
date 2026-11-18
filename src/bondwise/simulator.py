@@ -142,13 +142,15 @@ def _simulate_coi(
     inflation: float,
     belka: bool,
     product: ProductParams = COI,
+    reinvest: bool = True,
 ) -> ProductPath:
     bonds, idle = _floor_bonds(lump_sum)
     points: list[YearPoint] = []
     year_in_cycle = 0
 
     for year in range(1, horizon_years + 1):
-        if bonds == 0 and idle < FACE_VALUE:
+        # Without reinvest, keep cash idle after maturity/cash-out (no rebuy).
+        if bonds == 0 and (not reinvest or idle < FACE_VALUE):
             points.append(
                 YearPoint(
                     year=year,
@@ -182,12 +184,13 @@ def _simulate_coi(
         )
 
         if at_maturity:
-            # Maturity: full coupon, no fee; reinvest all proceeds into a new COI cycle.
+            # Maturity: full coupon, no fee; optionally roll into a new COI cycle.
             net = _apply_belka(interest, belka)
             idle = _money(idle + bonds * FACE_VALUE + net)
             bonds = 0
             year_in_cycle = 0
-            bonds, idle = _buy_bonds(idle, bonds)
+            if reinvest:
+                bonds, idle = _buy_bonds(idle, bonds)
             points.append(
                 YearPoint(
                     year=year,
@@ -195,7 +198,7 @@ def _simulate_coi(
                     income=net,
                     bonds=bonds,
                     idle_cash=idle,
-                    is_roll=True,
+                    is_roll=reinvest,
                     exit=exit_snap,
                 )
             )
@@ -218,10 +221,11 @@ def _simulate_coi(
             bonds = 0
             year_in_cycle = 0
         else:
-            # Hold: Belka on coupon, reinvest net into whole bonds; remainder idle at 0%.
+            # Hold: Belka on coupon; optionally reinvest net into whole bonds.
             net = _apply_belka(interest, belka)
             idle = _money(idle + net)
-            bonds, idle = _buy_bonds(idle, bonds)
+            if reinvest:
+                bonds, idle = _buy_bonds(idle, bonds)
             points.append(
                 YearPoint(
                     year=year,
@@ -247,6 +251,7 @@ def _simulate_edo(
     inflation: float,
     belka: bool,
     product: ProductParams = EDO,
+    reinvest: bool = True,
 ) -> ProductPath:
     bonds, idle = _floor_bonds(lump_sum)
     points: list[YearPoint] = []
@@ -257,7 +262,8 @@ def _simulate_edo(
     basis = _money(bonds * FACE_VALUE)
 
     for year in range(1, horizon_years + 1):
-        if bonds == 0 and idle < FACE_VALUE:
+        # Without reinvest, keep cash idle after maturity/cash-out (no rebuy).
+        if bonds == 0 and (not reinvest or idle < FACE_VALUE):
             points.append(
                 YearPoint(
                     year=year,
@@ -296,15 +302,16 @@ def _simulate_edo(
         )
 
         if at_maturity:
-            # Maturity: pay capitalized interest (no fee); roll proceeds into new EDO.
+            # Maturity: pay capitalized interest (no fee); optionally roll into new EDO.
             net = _apply_belka(accrued, belka)
             idle = _money(idle + bonds * FACE_VALUE + net)
             bonds = 0
             accrued = 0.0
             basis = 0.0
             year_in_cycle = 0
-            bonds, idle = _buy_bonds(idle, bonds)
-            basis = _money(bonds * FACE_VALUE)
+            if reinvest:
+                bonds, idle = _buy_bonds(idle, bonds)
+                basis = _money(bonds * FACE_VALUE)
             points.append(
                 YearPoint(
                     year=year,
@@ -312,7 +319,7 @@ def _simulate_edo(
                     income=net,
                     bonds=bonds,
                     idle_cash=idle,
-                    is_roll=True,
+                    is_roll=reinvest,
                     exit=exit_snap,
                 )
             )
@@ -364,9 +371,14 @@ def simulate(
     belka: bool = True,
     coi: ProductParams = COI,
     edo: ProductParams = EDO,
+    reinvest: bool = True,
 ) -> SimulationResult:
-    coi_path = _simulate_coi(lump_sum, horizon_years, inflation, belka, coi)
-    edo_path = _simulate_edo(lump_sum, horizon_years, inflation, belka, edo)
+    coi_path = _simulate_coi(
+        lump_sum, horizon_years, inflation, belka, coi, reinvest=reinvest
+    )
+    edo_path = _simulate_edo(
+        lump_sum, horizon_years, inflation, belka, edo, reinvest=reinvest
+    )
     return SimulationResult(
         coi=coi_path,
         edo=edo_path,

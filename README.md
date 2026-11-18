@@ -1,6 +1,6 @@
 # Bondwise
 
-Compare Polish Treasury inflation-linked retail bonds — **4-year COI** vs **10-year EDO** — for a lump-sum investment. Adjust amount, horizon (1–20 years), assumed future inflation, and Belka tax. The app shows wallet growth, fee-reduced income, roll markers, KPIs, and a year-by-year table.
+Compare Polish Treasury inflation-linked retail bonds — **4-year COI** vs **10-year EDO** — for a lump-sum investment. Adjust amount, horizon (1–20 years), assumed future inflation, Belka tax, and whether proceeds are reinvested into more bonds or kept as idle cash. The app shows wallet growth, fee-reduced income, roll markers, KPIs, and a year-by-year table.
 
 Interactive UI: https://wsm-77.github.io/bondwise/
 
@@ -23,4 +23,5 @@ Default product parameters match the official October 2026 offer window for seri
 
 - Whole-year steps only (no mid-year day-count)
 - Lump sum only (no DCA / recurring contributions)
-- Idle cash under 100 PLN sits at 0% and is included in wallet totals
+- Idle cash sits at 0% and is included in wallet totals (sub-100 PLN remainder when reinvesting; full net coupons / post-maturity cash when reinvest is off)
+- Reinvest defaults on (today’s hold/roll behavior); off keeps proceeds as idle cash with no coupon buys or maturity rolls

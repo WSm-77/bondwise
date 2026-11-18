@@ -10,6 +10,7 @@ const els = {
   inf: document.getElementById("inf"),
   infN: document.getElementById("inf-n"),
   belka: document.getElementById("belka"),
+  reinvest: document.getElementById("reinvest"),
   status: document.getElementById("status"),
   tableBody: document.getElementById("table-body"),
   kpiCoiWallet: document.getElementById("kpi-coi-wallet"),
@@ -43,6 +44,7 @@ function readControls() {
     horizon: Number(els.hz.value),
     inflationPct: Number(els.infN.value),
     belka: els.belka.checked,
+    reinvest: els.reinvest.checked,
   };
 }
 
@@ -230,17 +232,18 @@ function render(view, lumpSum) {
 function recompute() {
   if (!pyodide) return;
   const token = ++runToken;
-  const { lumpSum, horizon, inflationPct, belka } = readControls();
+  const { lumpSum, horizon, inflationPct, belka, reinvest } = readControls();
   els.hzVal.textContent = String(horizon);
   try {
     pyodide.globals.set("bw_lump", lumpSum);
     pyodide.globals.set("bw_horizon", horizon);
     pyodide.globals.set("bw_inflation", inflationPct / 100.0);
     pyodide.globals.set("bw_belka", belka);
+    pyodide.globals.set("bw_reinvest", reinvest);
     const rawJson = pyodide.runPython(`
 import json
 from bondwise import simulate
-_r = simulate(bw_lump, bw_horizon, bw_inflation, bw_belka)
+_r = simulate(bw_lump, bw_horizon, bw_inflation, bw_belka, reinvest=bw_reinvest)
 
 def _path(p):
     return {
@@ -299,6 +302,7 @@ function bindControls() {
     return Math.max(0, Math.min(15, Math.round(n * 10) / 10));
   });
   els.belka.addEventListener("change", recompute);
+  els.reinvest.addEventListener("change", recompute);
 }
 
 async function boot() {
